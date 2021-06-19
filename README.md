@@ -97,7 +97,13 @@ INSERT INTO `city` (`id`, `region_id`, `name`) VALUES
 (11, 2, 'Тында'),
 (12, 4, 'Луга');
   ```
-
+  
+  ### Unit Тесты
+  [Директория](https://github.com/dhanadadas/simple-geo-base/tree/main/unit_tests)
+  Запуск из консоли:
+  ```bash
+  phpunit geoBaseTest.php
+```
 ### Клон данного репозитория:
 ```git
 git clone https://github.com/dhanadadas/simple-geo-base.git
@@ -106,3 +112,5 @@ git clone https://github.com/dhanadadas/simple-geo-base.git
 ### Отдельная задача: простая респонсивная верстка
 [Респонсивная таблица](https://dhanadadas.github.io/simple-geo-base/adaptiveTable/)
 ([код](https://github.com/dhanadadas/simple-geo-base/tree/main/adaptiveTable))
+
+![UNIT](unit.jpg "UNIT Tests")
