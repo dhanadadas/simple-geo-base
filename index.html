@@ -11,109 +11,64 @@
 <body>
 
 <div>
-    <select required name="getCountry" onchange="loadRegion(this)">
+    <select required name="country" onchange="loadJson('region',this)">
         <option>Загрузка...</option>
     </select>
 
-    <select class="element select medium" required id="element_21" name="getRegion" disabled="disabled" onchange="loadCity(this)">
+    <select class="element select medium" required id="element_21" name="region" disabled="disabled"
+            onchange="loadJson('city',this)">
         <option>Выберите страну</option>
     </select>
 
-    <select class="element select medium" required id="element_22" name="getCity" disabled="disabled">
+    <select class="element select medium" required id="element_22" name="city" disabled="disabled">
         <option>Выберите регион</option>
     </select>
 </div>
 
 <script type="text/javascript">
-	//<![CDATA[
-	function loadCountry(select) {
-		var citySelect = $('select[name="getCountry"]');
-		citySelect.attr('disabled', 'disabled'); // делаем список городов не активным
+	function loadJson(action, select = false) {
 
-		// послыаем AJAX запрос, который вернёт список городов для выбранной области в JSON
-		$.getJSON('controller.php', {action: 'getCountry'}, function (cityList) {
+		let element = $(`select[name=${action}]`);
+		let city = $("select[name='city']");
 
-			citySelect.html(''); // очищаем список городов
+		element.attr('disabled', 'disabled'); // делаем список городов не активным
 
-			// заполняем список городов новыми пришедшими данными
-			$.each(cityList, function () {
-				citySelect.append('<option value="' + this.id + '">' + this.name + '</option>');
-			});
+		if (action === 'region') city.attr('disabled', 'disabled'); // если функция запрашивает регионы,
 
-			citySelect.removeAttr('disabled'); // делаем список городов активным
+		$.getJSON('api.php', {action: action, id: select.value}, function (elementList) {// послыаем AJAX запрос
+			element.html(''); // очищаем список текущих елементов
+			if (action === 'region') {
+				city.html('');
+				city.append('<option value="">Выберите регион</option>');
+			}
+			changeHTML(element, elementList);
 		});
+		return true;
 	}
 
-		function loadRegion(select) {
-			var citySelect = $('select[name="getRegion"]');
-			citySelect.attr('disabled', 'disabled'); // делаем список городов не активным
-
-			// послыаем AJAX запрос, который вернёт список городов для выбранной области в JSON
-			$.getJSON('controller.php', {action: 'Region', id: select.value}, function (cityList) {
-
-				citySelect.html(''); // очищаем список городов
-
-				// заполняем список городов новыми пришедшими данными
-              if(cityList){
-				$.each(cityList, function (i) {
-					citySelect.append('<option value="' + this.id + '">' + this.name + '</option>');
-				});
-								citySelect.removeAttr('disabled'); // делаем список городов активным
-							} else {
-              	citySelect.append('<option value="">Нет данных</option>');
-				citySelect.attr('disabled', 'disabled');
-							}
-			});
+	function changeHTML(element, elementList) {
+		if (elementList.status === false) { // если подключения нет
+			let country = $("select[name='country']");
+			country.html('');
+			country.append('<option value="">Укажите подключение к базе данных</option>');
 		}
-
-	function loadCity(select) {
-		var citySelect = $('select[name="getCity"]');
-		citySelect.attr('disabled', 'disabled'); // делаем список городов не активным
-
-		// послыаем AJAX запрос, который вернёт список городов для выбранной области в JSON
-		$.getJSON('controller.php', {action: 'getCity', id: select.value}, function (cityList) {
-
-			citySelect.html(''); // очищаем список городов
-
-			// заполняем список городов новыми пришедшими данными
-			$.each(cityList, function (i) {
-				citySelect.append('<option value="' + this.id + '">' + this.name + '</option>');
+		if (elementList.data === false) { // если нет подходящих данных в DB
+			element.append('<option value="">Нет данных</option>');
+			element.attr('disabled', 'disabled');
+		}
+		// заполняем список новыми пришедшими данными
+		else {
+			element.append('<option value="">Выбрать</option>');
+			$.each(elementList.data, function (i) {
+				element.append('<option value="' + this.id + '">' + this.name + '</option>');
 			});
-
-			citySelect.removeAttr('disabled'); // делаем список городов активным
-
-		});
+			element.removeAttr('disabled'); // делаем список городов активным
+		}
 	}
 
-		function loadJson(select) {
-					action=select.name;
-					console.log(action);
-			var citySelect = $("select[name=${action}]");
+	loadJson('country'); // загрузка стран
 
-			citySelect.attr('disabled', 'disabled'); // делаем список городов не активным
 
-          // if(action === 'country') action = 'getCountry';
-          // if(action === 'region') action = 'getCity';
-          // if(action === 'city') action = 'getCity';
-
-			// послыаем AJAX запрос, который вернёт список городов для выбранной области в JSON
-			$.getJSON('controller.php', {action: action, region: select.value}, function (cityList) {
-
-				citySelect.html(''); // очищаем список городов
-
-				// заполняем список городов новыми пришедшими данными
-				$.each(cityList, function (i) {
-					citySelect.append('<option value="' + i + '">' + this.name + '</option>');
-				});
-
-				citySelect.removeAttr('disabled'); // делаем список городов активным
-
-			});
-		}
-
-		loadCountry();
-
-	// ]]>
 </script>
 </body>
 </html>
