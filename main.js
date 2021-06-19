@@ -27,8 +27,6 @@ function loadJson(action, select = false) {
 }
 
 function changeHTML(element, dataList) {
-	console.log(dataList.status)
-	console.log(dataList.data)
 	if (dataList.status === false) { // если подключения нет
 		let country = document.querySelector("select[name='country']");
 		removeChild(country);
