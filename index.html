@@ -5,7 +5,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <title>GeoBase</title>
 </head>
 <body>
@@ -28,46 +28,60 @@
 <script type="text/javascript">
 	function loadJson(action, select = false) {
 
-		let element = $(`select[name=${action}]`);
-		let city = $("select[name='city']");
+		let element = document.querySelector(`select[name=${action}]`);
+		let city = document.querySelector("select[name='city']");
 
-		element.attr('disabled', 'disabled'); // делаем список городов не активным
+		element.setAttribute('disabled', 'disabled'); // делаем список городов не активным
 
-		if (action === 'region') city.attr('disabled', 'disabled'); // если функция запрашивает регионы,
+		if (action === 'region') city.setAttribute('disabled', 'disabled'); // если функция запрашивает регионы,
 
-		$.getJSON('api.php', {action: action, id: select.value}, function (elementList) {// послыаем AJAX запрос
-			element.html(''); // очищаем список текущих елементов
-			if (action === 'region') {
-				city.html('');
-				city.append('<option value="">Выберите регион</option>');
-			}
-			changeHTML(element, elementList);
-		});
+		let value = select.value;
+
+		fetch(`api.php?action=${action}&id=${value}`) // отправляем
+			.then((response) => {
+				return response.json();
+			})
+			.then((dataList) => {
+				removeChild(element);
+				//element.html(''); // очищаем список текущих елементов
+				if (action === 'region') {
+					removeChild(city);
+					//city.html('');
+					city.insertAdjacentHTML("beforeend", '<option value="">Выберите регион</option>');
+				}
+				changeHTML(element, dataList);
+			});
 		return true;
 	}
 
-	function changeHTML(element, elementList) {
-		if (elementList.status === false) { // если подключения нет
-			let country = $("select[name='country']");
-			country.html('');
-			country.append('<option value="">Укажите подключение к базе данных</option>');
-		}
-		if (elementList.data === false) { // если нет подходящих данных в DB
-			element.append('<option value="">Нет данных</option>');
+	function changeHTML(element, dataList) {
+		console.log(dataList.status)
+		console.log(dataList.data)
+		if (dataList.status === false) { // если подключения нет
+			let country = document.querySelector("select[name='country']");
+			removeChild(country);
+			country.insertAdjacentHTML("beforeend", '<option value="">Укажите подключение к базе данных</option>');
+		} else if (dataList.data === false) { // если нет подходящих данных в DB
+			element.insertAdjacentHTML("beforeend", '<option value="">Нет данных</option>');
 			element.attr('disabled', 'disabled');
 		}
 		// заполняем список новыми пришедшими данными
 		else {
-			element.append('<option value="">Выбрать</option>');
-			$.each(elementList.data, function (i) {
-				element.append('<option value="' + this.id + '">' + this.name + '</option>');
+			element.insertAdjacentHTML("beforeend", '<option value="">Выбрать</option>');
+			dataList.data.map(function(item) {
+				element.insertAdjacentHTML("beforeend", '<option value="' + item.id + '">' + item.name + '</option>');
 			});
-			element.removeAttr('disabled'); // делаем список городов активным
+			element.removeAttribute('disabled'); // делаем список городов активным
+		}
+	}
+
+	function removeChild(element) {
+		while (element.firstChild) {
+			element.removeChild(element.firstChild);
 		}
 	}
 
 	loadJson('country'); // загрузка стран
-
 
 </script>
 </body>
