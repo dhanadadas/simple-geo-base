@@ -1,19 +1,23 @@
-CREATE TABLE `country` (
+CREATE TABLE IF NOT EXISTS `country` (
 	`id` int(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `name` varchar(64) COLLATE utf8mb4_unicode_520_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 
-CREATE TABLE `region` (
+CREATE TABLE IF NOT EXISTS `region` (
 	`id` int(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `country_id` int(11) UNSIGNED DEFAULT NULL,
-  `name` varchar(64) COLLATE utf8mb4_unicode_520_ci DEFAULT NULL
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
+  `name` varchar(64) COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
+  KEY `index_foreignkey_region_country` (`country_id`),
+  CONSTRAINT `c_fk_region_country_id` FOREIGN KEY (`country_id`) REFERENCES `country` (`id`) ON DELETE SET NULL ON UPDATE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 
-CREATE TABLE  `city` (
+CREATE TABLE IF NOT EXISTS `city` (
 	`id` int(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `region_id` int(11) UNSIGNED DEFAULT NULL,
-  `name` varchar(64) COLLATE utf8mb4_unicode_520_ci DEFAULT NULL
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
+  `name` varchar(64) COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
+  KEY `index_foreignkey_city_region` (`region_id`),
+  CONSTRAINT `c_fk_city_region_id` FOREIGN KEY (`region_id`) REFERENCES `region` (`id`) ON DELETE SET NULL ON UPDATE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 
 INSERT INTO `country` (`id`, `name`) VALUES
 (1, 'Россия'),
