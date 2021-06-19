@@ -80,6 +80,17 @@ class geoBase
 	}
 
 	/**
+	 * Метод getSQL for createDB
+	 *
+	 * @return false|string
+	 */
+	private function getSQL()
+	{
+		return file_get_contents('./base.sql');
+	}
+
+
+	/**
 	 * Destruct method
 	 */
 	public function __destruct()
