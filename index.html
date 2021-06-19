@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>GeoBase</title>
+</head>
+<body>
+
+<div>
+    <select required name="getCountry" onchange="loadRegion(this)">
+        <option>Загрузка...</option>
+    </select>
+
+    <select class="element select medium" required id="element_21" name="getRegion" disabled="disabled" onchange="loadCity(this)">
+        <option>Выберите страну</option>
+    </select>
+
+    <select class="element select medium" required id="element_22" name="getCity" disabled="disabled">
+        <option>Выберите регион</option>
+    </select>
+</div>
+
+<script type="text/javascript">
+	//<![CDATA[
+	function loadCountry(select) {
+		var citySelect = $('select[name="getCountry"]');
+		citySelect.attr('disabled', 'disabled'); // делаем список городов не активным
+
+		// послыаем AJAX запрос, который вернёт список городов для выбранной области в JSON
+		$.getJSON('controller.php', {action: 'getCountry'}, function (cityList) {
+
+			citySelect.html(''); // очищаем список городов
+
+			// заполняем список городов новыми пришедшими данными
+			$.each(cityList, function () {
+				citySelect.append('<option value="' + this.id + '">' + this.name + '</option>');
+			});
+
+			citySelect.removeAttr('disabled'); // делаем список городов активным
+		});
+	}
+
+		function loadRegion(select) {
+			var citySelect = $('select[name="getRegion"]');
+			citySelect.attr('disabled', 'disabled'); // делаем список городов не активным
+
+			// послыаем AJAX запрос, который вернёт список городов для выбранной области в JSON
+			$.getJSON('controller.php', {action: 'Region', id: select.value}, function (cityList) {
+
+				citySelect.html(''); // очищаем список городов
+
+				// заполняем список городов новыми пришедшими данными
+              if(cityList){
+				$.each(cityList, function (i) {
+					citySelect.append('<option value="' + this.id + '">' + this.name + '</option>');
+				});
+								citySelect.removeAttr('disabled'); // делаем список городов активным
+							} else {
+              	citySelect.append('<option value="">Нет данных</option>');
+				citySelect.attr('disabled', 'disabled');
+							}
+			});
+		}
+
+	function loadCity(select) {
+		var citySelect = $('select[name="getCity"]');
+		citySelect.attr('disabled', 'disabled'); // делаем список городов не активным
+
+		// послыаем AJAX запрос, который вернёт список городов для выбранной области в JSON
+		$.getJSON('controller.php', {action: 'getCity', id: select.value}, function (cityList) {
+
+			citySelect.html(''); // очищаем список городов
+
+			// заполняем список городов новыми пришедшими данными
+			$.each(cityList, function (i) {
+				citySelect.append('<option value="' + this.id + '">' + this.name + '</option>');
+			});
+
+			citySelect.removeAttr('disabled'); // делаем список городов активным
+
+		});
+	}
+
+		function loadJson(select) {
+					action=select.name;
+					console.log(action);
+			var citySelect = $("select[name=${action}]");
+
+			citySelect.attr('disabled', 'disabled'); // делаем список городов не активным
+
+          // if(action === 'country') action = 'getCountry';
+          // if(action === 'region') action = 'getCity';
+          // if(action === 'city') action = 'getCity';
+
+			// послыаем AJAX запрос, который вернёт список городов для выбранной области в JSON
+			$.getJSON('controller.php', {action: action, region: select.value}, function (cityList) {
+
+				citySelect.html(''); // очищаем список городов
+
+				// заполняем список городов новыми пришедшими данными
+				$.each(cityList, function (i) {
+					citySelect.append('<option value="' + i + '">' + this.name + '</option>');
+				});
+
+				citySelect.removeAttr('disabled'); // делаем список городов активным
+
+			});
+		}
+
+		loadCountry();
+
+	// ]]>
+</script>
+</body>
+</html>
