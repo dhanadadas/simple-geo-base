@@ -24,12 +24,24 @@ class geoBase
 		$this->connect->set_charset("utf8");
 	}
 
+	/**
+	 * Метод getCountry выводит все страны из базы данных в формате json
+	 *
+	 * @param $region
+	 * @return bool|false|string json ответ или false
+	 */
 	public function getCountry()
 	{
 		$country = mysqli_query($this->connect, "SELECT id,name FROM country");
 		return $this->responseJson($country);
 	}
 
+	/**
+	 * Метод getRegion принимает ID страны ($region) и ишет регионы прикрепленные к данной стране
+	 *
+	 * @param $region
+	 * @return bool|false|string json ответ или false
+	 */
 	public function getRegion($country)
 	{
 		if (!isset($country) || !is_numeric($country) || $country <= 0) return false; // is_numeric защита от SQL иньекции.
@@ -38,6 +50,12 @@ class geoBase
 		return $this->responseJson($regions);
 	}
 
+	/**
+	 * Метод getCity принимает ID регина и ишет города прикрепленные к данному региону
+	 *
+	 * @param $region
+	 * @return bool|false|string json ответ или false
+	 */
 	public function getCity($region)
 	{
 		if (!isset($region) || !is_numeric($region) || $region <= 0) return false; // is_numeric защита от SQL иньекции.
@@ -46,17 +64,31 @@ class geoBase
 		return $this->responseJson($city);
 	}
 
+	/**
+	 * Метод responseJson принимает выборку из базы данных, проверяет и выдает JSON ответ
+	 *
+	 * @param $element
+	 * @return false|string
+	 */
 	private function responseJson($element)
 	{
-		if (!$element) return false;
+		if (!$element) return json_encode(['status' => false, 'code' => 'Ошибка запроса']);
 		if ($element->num_rows !== 0) {
 			while ($row = $element->fetch_array(MYSQLI_ASSOC)) {
 				$result[] = $row;
 			}
-		} else return true;//json_encode(array('Нет регионов для этой страны'));
-		return $result;// возвраащем данные в JSON формате;
+		} else return json_encode(['status' => true, 'data' => false]);//json_encode(array('Нет регионов для этой страны'));
+		return json_encode(['status' => true, 'data' => $result]);;// возвраащем данные в JSON формате;
 	}
 
+	/**
+	 * Создание и заполнение BD
+	 *
+	 * Метод createDB создает структуру и загружает данные,
+	 * если правильно указаны реквизиты подключения DB
+	 *
+	 * @return boolean true или false
+	 */
 	function createDB()
 	{
 		$sql = $this->getSQL();
@@ -65,6 +97,16 @@ class geoBase
 		} else {
 			return json_encode(['status' => false, 'code' => 'Import error']);
 		}
+	}
+
+	/**
+	 * Метод getSQL for createDB
+	 *
+	 * @return false|string
+	 */
+	private function getSQL()
+	{
+		return file_get_contents('./base.sql');
 	}
 
 	/**
@@ -86,17 +128,6 @@ class geoBase
 		var_dump($var);
 		echo '</pre>';
 	}
-
-	/**
-	 * Метод getSQL for createDB
-	 *
-	 * @return false|string
-	 */
-	private function getSQL()
-	{
-		return file_get_contents('./base.sql');
-	}
-
 
 	/**
 	 * Destruct method
