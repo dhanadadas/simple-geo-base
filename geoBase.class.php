@@ -8,20 +8,11 @@ class geoBase
 	public function __construct()
 	{
 
+		// данные DB по умолчанию
 		$this->sql_host = "localhost";
 		$this->sql_user = "root";
 		$this->sql_pass = "pass";
 		$this->sql_database = "geoBase";
-
-		// проверка правильности подключения
-		try {
-			mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-			$this->connect = mysqli_connect($this->sql_host, $this->sql_user, $this->sql_pass, $this->sql_database);
-		} catch (Exception $e) {
-			echo json_encode(['status' => false, 'code' => 'Error DB']);
-			exit();
-		}
-		$this->connect->set_charset("utf8");
 	}
 
 	/**
@@ -32,6 +23,7 @@ class geoBase
 	 */
 	public function getCountry()
 	{
+		$this->connect();
 		$country = mysqli_query($this->connect, "SELECT id,name FROM country");
 		return $this->responseJson($country);
 	}
@@ -44,6 +36,7 @@ class geoBase
 	 */
 	public function getRegion($country)
 	{
+		$this->connect();
 		if (!isset($country) || !is_numeric($country) || $country <= 0) return false; // is_numeric защита от SQL иньекции.
 
 		$regions = mysqli_query($this->connect, "SELECT id,name FROM region WHERE country_id = $country");
@@ -58,6 +51,7 @@ class geoBase
 	 */
 	public function getCity($region)
 	{
+		$this->connect();
 		if (!isset($region) || !is_numeric($region) || $region <= 0) return false; // is_numeric защита от SQL иньекции.
 
 		$city = mysqli_query($this->connect, "SELECT id,name FROM city WHERE region_id = $region");
@@ -72,6 +66,7 @@ class geoBase
 	 */
 	private function responseJson($element)
 	{
+		$this->connect();
 		if (!$element) return json_encode(['status' => false, 'code' => 'Ошибка запроса']);
 		if ($element->num_rows !== 0) {
 			while ($row = $element->fetch_array(MYSQLI_ASSOC)) {
@@ -91,6 +86,7 @@ class geoBase
 	 */
 	function createDB()
 	{
+		$this->connect();
 		$sql = $this->getSQL();
 		if (mysqli_multi_query($this->connect, $sql)) {
 			return json_encode(['status' => true, 'code' => 'Database created successfully']);
@@ -107,6 +103,24 @@ class geoBase
 	private function getSQL()
 	{
 		return file_get_contents('./base.sql');
+	}
+
+	/**
+	 * Соединение с базой данных
+	 *
+	 * @return bool or json (Error)
+	 */
+	protected function connect(){
+		// проверка правильности подключения
+		try {
+			mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+			$this->connect = mysqli_connect($this->sql_host, $this->sql_user, $this->sql_pass, $this->sql_database);
+		} catch (Exception $e) {
+			echo json_encode(['status' => false, 'code' => 'Error DB']);
+			exit();
+		}
+		$this->connect->set_charset("utf8");
+		return true;
 	}
 
 	/**
