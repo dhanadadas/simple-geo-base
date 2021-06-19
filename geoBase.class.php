@@ -13,7 +13,15 @@ class geoBase
 		$this->sql_pass = "pass";
 		$this->sql_database = "geoBase";
 
-		$this->connect = mysqli_connect($this->sql_host, $this->sql_user, $this->sql_pass, $this->sql_database);
+		// проверка правильности подключения
+		try {
+			mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+			$this->connect = mysqli_connect($this->sql_host, $this->sql_user, $this->sql_pass, $this->sql_database);
+		} catch (Exception $e) {
+			echo json_encode(['status' => false, 'code' => 'Error DB']);
+			exit();
+		}
+		$this->connect->set_charset("utf8");
 	}
 
 	public function getCountry()
